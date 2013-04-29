@@ -3,7 +3,7 @@ namespace :symfony do
     namespace :database do
       [:create, :drop].each do |action|
         desc "#{action.to_s.capitalize}s the configured databases"
-        task action, :roles => :app, :except => { :no_release => true } do
+        task action, :roles => :api, :except => { :no_release => true } do
           case action.to_s
           when "create"
             capifony_pretty_print "--> Creating databases"
@@ -19,7 +19,7 @@ namespace :symfony do
 
     namespace :build do
       desc "Builds the Model classes"
-      task :model, :roles => :app, :except => { :no_release => true } do
+      task :model, :roles => :api, :except => { :no_release => true } do
         command = "propel:model:build"
         if /2\.0\.[0-9]+.*/ =~ symfony_version
           command = "propel:build-model"
@@ -32,7 +32,7 @@ namespace :symfony do
       end
 
       desc "Builds SQL statements"
-      task :sql, :roles => :app, :except => { :no_release => true } do
+      task :sql, :roles => :api, :except => { :no_release => true } do
         command = "propel:sql:build"
         if /2\.0\.[0-9]+.*/ =~ symfony_version
           command = "propel:build-sql"
@@ -45,7 +45,7 @@ namespace :symfony do
       end
 
       desc "Inserts SQL statements"
-      task :sql_load, :roles => :app, :except => { :no_release => true } do
+      task :sql_load, :roles => :api, :except => { :no_release => true } do
         command = "propel:sql:insert"
         if /2\.0\.[0-9]+.*/ =~ symfony_version
           command = "propel:insert-sql"
@@ -58,7 +58,7 @@ namespace :symfony do
       end
 
       desc "Builds the Model classes, SQL statements and insert SQL"
-      task :all_and_load, :roles => :app, :except => { :no_release => true } do
+      task :all_and_load, :roles => :api, :except => { :no_release => true } do
         capifony_pretty_print "--> Setting up Propel (classes, SQL)"
 
         run "#{try_sudo} sh -c 'cd #{latest_release} && #{php_bin} #{symfony_console} propel:build --insert-sql #{console_options}'"
@@ -66,12 +66,12 @@ namespace :symfony do
       end
 
       desc "Generates ACLs models"
-      task :acl, :roles => :app, :except => { :no_release => true } do
+      task :acl, :roles => :api, :except => { :no_release => true } do
         run "#{try_sudo} sh -c 'cd #{latest_release} && #{php_bin} #{symfony_console} propel:acl:init #{console_options}'"
       end
 
       desc "Inserts propel ACL tables"
-      task :acl_load, :roles => :app, :except => { :no_release => true } do
+      task :acl_load, :roles => :api, :except => { :no_release => true } do
         run "#{try_sudo} sh -c 'cd #{latest_release} && #{php_bin} #{symfony_console} propel:acl:init #{console_options} --force'", :once => true
       end
     end

@@ -2,7 +2,7 @@ namespace :symfony do
   namespace :doctrine do
     namespace :cache do
       desc "Clears all metadata cache for a entity manager"
-      task :clear_metadata, :roles => :app, :except => { :no_release => true } do
+      task :clear_metadata, :roles => :api, :except => { :no_release => true } do
         capifony_pretty_print "--> Clearing Doctrine metadata cache"
 
         if doctrine_clear_use_flush_option
@@ -16,7 +16,7 @@ namespace :symfony do
       end
 
       desc "Clears all query cache for a entity manager"
-      task :clear_query, :roles => :app, :except => { :no_release => true } do
+      task :clear_query, :roles => :api, :except => { :no_release => true } do
         capifony_pretty_print "--> Clearing Doctrine query cache"
 
         if doctrine_clear_use_flush_option
@@ -30,7 +30,7 @@ namespace :symfony do
       end
 
       desc "Clears result cache for a entity manager"
-      task :clear_result, :roles => :app, :except => { :no_release => true } do
+      task :clear_result, :roles => :api, :except => { :no_release => true } do
         capifony_pretty_print "--> Clearing Doctrine result cache"
 
         if doctrine_clear_use_flush_option
@@ -46,7 +46,7 @@ namespace :symfony do
 
     namespace :database do
       desc "Drops the configured databases"
-      task :drop, :roles => :app, :except => { :no_release => true } do
+      task :drop, :roles => :api, :except => { :no_release => true } do
         capifony_pretty_print "--> Dropping databases"
 
         if !interactive_mode || Capistrano::CLI.ui.agree("Do you really want to drop #{symfony_env_prod}'s database? (y/N)")
@@ -56,7 +56,7 @@ namespace :symfony do
       end
       
       desc "Creates the configured databases"
-      task :create, :roles => :app, :except => { :no_release => true } do
+      task :create, :roles => :api, :except => { :no_release => true } do
         capifony_pretty_print "--> Creating databases"
 
         run "#{try_sudo} sh -c 'cd #{latest_release} && #{php_bin} #{symfony_console} doctrine:database:create #{console_options}'", :once => true
@@ -66,7 +66,7 @@ namespace :symfony do
 
     namespace :schema do
       desc "Processes the schema and either create it directly on EntityManager Storage Connection or generate the SQL output"
-      task :create, :roles => :app, :except => { :no_release => true } do
+      task :create, :roles => :api, :except => { :no_release => true } do
         capifony_pretty_print "--> Creating schema"
 
         run "#{try_sudo} sh -c 'cd #{latest_release} && #{php_bin} #{symfony_console} doctrine:schema:create #{console_options}#{doctrine_em_flag}'", :once => true
@@ -74,7 +74,7 @@ namespace :symfony do
       end
 
       desc "Drops the complete database schema of EntityManager Storage Connection or generate the corresponding SQL output"
-      task :drop, :roles => :app, :except => { :no_release => true } do
+      task :drop, :roles => :api, :except => { :no_release => true } do
         capifony_pretty_print "--> Droping schema"
 
         if !interactive_mode || Capistrano::CLI.ui.agree("Do you really want to drop #{symfony_env_prod}'s database schema? (y/N)")
@@ -84,7 +84,7 @@ namespace :symfony do
       end
 
       desc "Updates database schema of EntityManager Storage Connection"
-      task :update, :roles => :app, :except => { :no_release => true } do
+      task :update, :roles => :api, :except => { :no_release => true } do
         capifony_pretty_print "--> Updating schema"
 
         run "#{try_sudo} sh -c 'cd #{latest_release} && #{php_bin} #{symfony_console} doctrine:schema:update --force #{console_options}#{doctrine_em_flag}'", :once => true
@@ -93,13 +93,13 @@ namespace :symfony do
     end
 
     desc "Load data fixtures"
-    task :load_fixtures, :roles => :app, :except => { :no_release => true } do
+    task :load_fixtures, :roles => :api, :except => { :no_release => true } do
       run "#{try_sudo} sh -c 'cd #{latest_release} && #{php_bin} #{symfony_console} doctrine:fixtures:load #{console_options}#{doctrine_em_flag}'", :once => true
     end
 
     namespace :migrations do
       desc "Executes a migration to a specified version or the latest available version"
-      task :migrate, :roles => :app, :only => { :primary => true }, :except => { :no_release => true } do
+      task :migrate, :roles => :api, :only => { :primary => true }, :except => { :no_release => true } do
         currentVersion = nil
         run "#{try_sudo} sh -c 'cd #{latest_release} && #{php_bin} #{symfony_console} --no-ansi doctrine:migrations:status #{console_options}#{doctrine_em_flag}'", :once => true do |ch, stream, out|
           if stream == :out and out =~ /Current Version:.+\(([\w]+)\)/
@@ -127,7 +127,7 @@ namespace :symfony do
       end
 
       desc "Views the status of a set of migrations"
-      task :status, :roles => :app, :except => { :no_release => true } do
+      task :status, :roles => :api, :except => { :no_release => true } do
         run "#{try_sudo} sh -c 'cd #{latest_release} && #{php_bin} #{symfony_console} doctrine:migrations:status #{console_options}#{doctrine_em_flag}'", :once => true
       end
     end
@@ -136,7 +136,7 @@ namespace :symfony do
       [:create, :update, :drop].each do |action|
         namespace :schema do
           desc "Allows you to #{action.to_s} databases, collections and indexes for your documents"
-          task action, :roles => :app, :except => { :no_release => true } do
+          task action, :roles => :api, :except => { :no_release => true } do
             capifony_pretty_print "--> Executing MongoDB schema #{action.to_s}"
 
             run "#{try_sudo} sh -c 'cd #{latest_release} && #{php_bin} #{symfony_console} doctrine:mongodb:schema:#{action.to_s} #{console_options}'", :once => true
@@ -147,7 +147,7 @@ namespace :symfony do
         if action != :update
           namespace :indexes do
             desc "Allows you to #{action.to_s} indexes *only* for your documents"
-            task action, :roles => :app do
+            task action, :roles => :api do
               capifony_pretty_print "--> Executing MongoDB indexes #{action.to_s}"
 
               run "#{try_sudo} sh -c 'cd #{latest_release} && #{php_bin} #{symfony_console} doctrine:mongodb:schema:#{action.to_s} --index #{console_options}'", :once => true
@@ -160,7 +160,7 @@ namespace :symfony do
 
     namespace :init do
       desc "Mounts ACL tables in the database"
-      task :acl, :roles => :app, :except => { :no_release => true } do
+      task :acl, :roles => :api, :except => { :no_release => true } do
         capifony_pretty_print "--> Mounting Doctrine ACL tables"
 
         run "#{try_sudo} sh -c 'cd #{latest_release} && #{php_bin} #{symfony_console} init:acl #{console_options}'", :once => true

@@ -1,6 +1,6 @@
 namespace :symfony do
   desc "Runs custom symfony command"
-  task :default, :roles => :app, :except => { :no_release => true } do
+  task :default, :roles => :api, :except => { :no_release => true } do
     prompt_with_default(:task_arguments, "cache:clear")
 
     stream "#{try_sudo} sh -c 'cd #{latest_release} && #{php_bin} #{symfony_console} #{task_arguments} #{console_options}'"
@@ -12,7 +12,7 @@ namespace :symfony do
       lines = ENV['lines'].nil? ? '50' : ENV['lines']
       log   = action.to_s == 'tail' ? 'prod.log' : 'dev.log'
       desc "Tail #{log}"
-      task action, :roles => :app, :except => { :no_release => true } do
+      task action, :roles => :api, :except => { :no_release => true } do
         run "#{try_sudo} tail -n #{lines} -f #{shared_path}/#{log_path}/#{log}" do |channel, stream, data|
           trap("INT") { puts 'Interupted'; exit 0; }
           puts
@@ -25,7 +25,7 @@ namespace :symfony do
 
   namespace :assets do
     desc "Updates assets version (in config.yml)"
-    task :update_version, :roles => :app, :except => { :no_release => true } do
+    task :update_version, :roles => :api, :except => { :no_release => true } do
       capifony_pretty_print "--> Updating assets version (in config.yml)"
 
       run "#{try_sudo} sed -i 's/\\(assets_version:[ ]*\\)\\([a-zA-Z0-9_]*\\)\\(.*\\)$/\\1#{real_revision[0,7]}\\3/g' #{latest_release}/#{app_config_path}/config.yml"
@@ -33,7 +33,7 @@ namespace :symfony do
     end
 
     desc "Installs bundle's assets"
-    task :install, :roles => :app, :except => { :no_release => true } do
+    task :install, :roles => :api, :except => { :no_release => true } do
       capifony_pretty_print "--> Installing bundle's assets"
 
       install_options = ''
@@ -53,7 +53,7 @@ namespace :symfony do
 
   namespace :assetic do
     desc "Dumps all assets to the filesystem"
-    task :dump, :roles => :app,  :except => { :no_release => true } do
+    task :dump, :roles => :api,  :except => { :no_release => true } do
       capifony_pretty_print "--> Dumping all assets to the filesystem"
 
       run "#{try_sudo} sh -c 'cd #{latest_release} && #{php_bin} #{symfony_console} assetic:dump #{console_options} #{latest_release}/#{web_path}'"
@@ -64,7 +64,7 @@ namespace :symfony do
   namespace :vendors do
     [:install, :reinstall, :upgrade].each do |action|
       desc "Runs the bin/vendors script to #{action.to_s} the vendors"
-      task action, :roles => :app, :except => { :no_release => true } do
+      task action, :roles => :api, :except => { :no_release => true } do
         capifony_pretty_print "--> #{action.to_s.capitalize}ing vendors"
 
         cmd = action.to_s
@@ -83,7 +83,7 @@ namespace :symfony do
 
   namespace :bootstrap do
     desc "Runs the bin/build_bootstrap script"
-    task :build, :roles => :app, :except => { :no_release => true } do
+    task :build, :roles => :api, :except => { :no_release => true } do
       capifony_pretty_print "--> Building bootstrap file"
 
       if !remote_file_exists?("#{latest_release}/#{build_bootstrap}") && true == use_composer then
@@ -99,7 +99,7 @@ namespace :symfony do
 
   namespace :composer do
     desc "Gets composer and installs it"
-    task :get, :roles => :app, :except => { :no_release => true } do
+    task :get, :roles => :api, :except => { :no_release => true } do
       if !remote_file_exists?("#{latest_release}/composer.phar")
         capifony_pretty_print "--> Downloading Composer"
 
@@ -115,7 +115,7 @@ namespace :symfony do
     desc "Updates composer"
 
     desc "Runs composer to install vendors from composer.lock file"
-    task :install, :roles => :app, :except => { :no_release => true } do
+    task :install, :roles => :api, :except => { :no_release => true } do
       if !composer_bin
         symfony.composer.get
         set :composer_bin, "#{php_bin} composer.phar"
@@ -127,7 +127,7 @@ namespace :symfony do
     end
 
     desc "Runs composer to update vendors, and composer.lock file"
-    task :update, :roles => :app, :except => { :no_release => true } do
+    task :update, :roles => :api, :except => { :no_release => true } do
       if !composer_bin
         symfony.composer.get
         set :composer_bin, "#{php_bin} composer.phar"
@@ -139,7 +139,7 @@ namespace :symfony do
     end
 
     desc "Dumps an optimized autoloader"
-    task :dump_autoload, :roles => :app, :except => { :no_release => true } do
+    task :dump_autoload, :roles => :api, :except => { :no_release => true } do
       if !composer_bin
         symfony.composer.get
         set :composer_bin, "#{php_bin} composer.phar"
@@ -161,7 +161,7 @@ namespace :symfony do
   namespace :cache do
     [:clear, :warmup].each do |action|
       desc "Cache #{action.to_s}"
-      task action, :roles => :app, :except => { :no_release => true } do
+      task action, :roles => :api, :except => { :no_release => true } do
         case action
         when :clear
           capifony_pretty_print "--> Clearing cache"
@@ -178,7 +178,7 @@ namespace :symfony do
 
   namespace :project do
     desc "Clears all non production environment controllers"
-    task :clear_controllers, :roles => :app, :except => { :no_release => true } do
+    task :clear_controllers, :roles => :api, :except => { :no_release => true } do
       capifony_pretty_print "--> Clear controllers"
 
       command = "#{try_sudo} sh -c 'cd #{latest_release} && rm -f"

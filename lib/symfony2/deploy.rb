@@ -4,7 +4,7 @@ namespace :deploy do
     Sets permissions for writable_dirs folders as described in the Symfony documentation
     (http://symfony.com/doc/master/book/installation.html#configuration-and-setup)
   DESC
-  task :set_permissions, :roles => :app, :except => { :no_release => true } do
+  task :set_permissions, :roles => :api, :except => { :no_release => true } do
     if writable_dirs && permission_method
       dirs = []
 
@@ -59,7 +59,7 @@ namespace :deploy do
   end
 
   desc "Symlinks static directories and static files that need to remain between deployments"
-  task :share_childs, :roles => :app, :except => { :no_release => true } do
+  task :share_childs, :roles => :api, :except => { :no_release => true } do
     if shared_children
       capifony_pretty_print "--> Creating symlinks for shared directories"
 
@@ -87,7 +87,7 @@ namespace :deploy do
   end
 
   desc "Updates latest release source path"
-  task :finalize_update, :roles => :app, :except => { :no_release => true } do
+  task :finalize_update, :roles => :api, :except => { :no_release => true } do
     run "#{try_sudo} chmod -R g+w #{latest_release}" if fetch(:group_writable, true)
 
     capifony_pretty_print "--> Creating cache directory"
@@ -119,20 +119,20 @@ namespace :deploy do
     Deploys and starts a `cold' application. This is useful if you have not \
     deployed your application before.
   DESC
-  task :cold, :roles => :app, :except => { :no_release => true } do
+  task :cold, :roles => :api, :except => { :no_release => true } do
     update
     start
   end
 
   desc "Deploys the application and runs the test suite"
-  task :test_all, :roles => :app, :except => { :no_release => true } do
+  task :test_all, :roles => :api, :except => { :no_release => true } do
     update_code
     create_symlink
     run "#{try_sudo} sh -c 'cd #{latest_release} && phpunit -c #{app_path} src'"
   end
 
   desc "Runs the Symfony2 migrations"
-  task :migrate, :roles => :app, :except => { :no_release => true }, :only => { :primary => true } do
+  task :migrate, :roles => :api, :except => { :no_release => true }, :only => { :primary => true } do
     if model_manager == "doctrine"
       symfony.doctrine.migrations.migrate
     else
